@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>YassLab Mobile</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;background:#f5f0e8;color:#2c1810;min-height:100vh}
+:root{--brown:#4a3219;--gold:#c9a96e;--green:#27ae60;--red:#e74c3c;--orange:#e67e22;--blue:#2471a3;--card:#fff;--brd:#e8ddd0;--txt3:#8b7355;--bg2:#f0ebe0}
+
+/* HEADER */
+.header{background:#4a3219;color:#e8d4a8;padding:14px 16px;padding-top:calc(14px + env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between}
+.header-title{font-size:17px;font-weight:700;font-family:Georgia,serif}
+.header-date{font-size:12px;opacity:.7}
+
+/* NAV BAS */
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e8ddd0;display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:100}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 10px;border:none;background:transparent;cursor:pointer;gap:3px;min-height:54px}
+.nav-btn span.ico{font-size:22px;line-height:1}
+.nav-btn span.lbl{font-size:10px;font-weight:500;color:#8b7355}
+.nav-btn.act span.lbl{color:#4a3219}
+.nav-btn.act span.ico{transform:scale(1.1)}
+
+/* MAIN */
+.main{padding:14px 14px calc(80px + env(safe-area-inset-bottom));min-height:100vh}
+
+/* VUES */
+.vue{display:none}
+.vue.act{display:block}
+
+/* CARTES */
+.card{background:#fff;border-radius:14px;border:1px solid #e8ddd0;padding:14px 16px;margin-bottom:12px}
+.card-title{font-size:13px;font-weight:700;color:#4a3219;margin-bottom:10px}
+
+/* GROS BOUTONS */
+.btn-big{width:100%;border:none;border-radius:14px;padding:18px 14px;font-size:15px;font-weight:600;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;min-height:90px;color:#fff;touch-action:manipulation}
+.btn-big .ico{font-size:30px}
+.btn-secondary{width:100%;border:none;border-radius:12px;padding:16px;font-size:14px;font-weight:600;cursor:pointer;color:#fff;touch-action:manipulation;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:10px;min-height:52px}
+.btn-outline{width:100%;border:1.5px solid #4a3219;border-radius:12px;padding:14px;font-size:14px;font-weight:600;cursor:pointer;color:#4a3219;background:#fff;touch-action:manipulation;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:10px;min-height:52px}
+
+/* LISTE */
+.list-item{background:#fff;border-radius:12px;border:1px solid #e8ddd0;padding:13px 15px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.list-item-name{font-size:14px;font-weight:600;color:#2c1810}
+.list-item-sub{font-size:11px;color:#8b7355;margin-top:2px}
+.list-item-val{font-size:15px;font-weight:700;color:#4a3219;text-align:right}
+.list-item-val.red{color:#e74c3c}
+.arrow{font-size:18px;color:#8b7355;margin-left:8px}
+
+/* ALERTE */
+.alert{border-radius:12px;padding:12px 14px;margin-bottom:10px;font-size:13px}
+.alert-red{background:#fdf2f2;border:1px solid #e74c3c;color:#c0392b}
+.alert-orange{background:#fef9f0;border:1px solid #e67e22;color:#a04000}
+.alert-green{background:#eafaf1;border:1px solid #27ae60;color:#1e8449}
+
+/* BADGE */
+.badge{display:inline-block;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:600}
+.badge-red{background:#fdf2f2;color:#e74c3c}
+.badge-green{background:#eafaf1;color:#27ae60}
+
+/* INPUTS */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;color:#8b7355;margin-bottom:6px;font-weight:500}
+.field input,.field select{width:100%;padding:14px;border:1.5px solid #e8ddd0;border-radius:10px;font-size:16px;background:#fff;color:#2c1810;appearance:none;-webkit-appearance:none}
+.field input:focus,.field select:focus{outline:none;border-color:#4a3219}
+
+/* AJUSTEUR QUANTITE */
+.qty-row{display:flex;align-items:center;gap:10px}
+.qty-btn{width:54px;height:54px;border:1.5px solid #e8ddd0;border-radius:10px;background:#f0ebe0;color:#2c1810;font-size:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;touch-action:manipulation}
+.qty-input{flex:1;padding:14px;border:1.5px solid #e8ddd0;border-radius:10px;font-size:22px;font-weight:700;text-align:center;background:#fff;color:#2c1810}
+.qty-unit{font-size:11px;color:#8b7355;text-align:center;margin-top:4px}
+
+/* RECETTE DETAIL */
+.rec-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #f0ebe0}
+.rec-row:last-child{border:none}
+.rec-ing{font-size:13px;color:#2c1810}
+.rec-qty{font-size:13px;font-weight:600;color:#4a3219}
+
+/* RETOUR */
+.btn-back{border:none;background:#f0ebe0;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:600;color:#4a3219;cursor:pointer;touch-action:manipulation;margin-bottom:14px;display:inline-flex;align-items:center;gap:6px}
+
+/* GRID 2 colonnes */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:40px 20px;color:#8b7355;font-size:14px}
+
+/* SEARCH */
+.search-input{width:100%;padding:14px;border:1.5px solid #e8ddd0;border-radius:12px;font-size:16px;background:#fff;color:#2c1810;margin-bottom:14px}
+.search-input:focus{outline:none;border-color:#4a3219}
+
+/* CONFIRM BTN */
+.btn-confirm{width:100%;border:none;border-radius:14px;padding:18px;font-size:16px;font-weight:700;background:#4a3219;color:#fff;cursor:pointer;touch-action:manipulation;margin-top:10px;min-height:56px}
+
+/* SCAN AREA */
+.scan-center{text-align:center;padding:30px 20px}
+.scan-ico{font-size:50px;margin-bottom:14px}
+.scan-title{font-size:16px;font-weight:700;color:#4a3219;margin-bottom:6px}
+.scan-sub{font-size:13px;color:#8b7355;margin-bottom:24px}
+.btn-camera{display:block;width:100%;border:none;border-radius:14px;padding:18px;font-size:16px;font-weight:700;background:#4a3219;color:#fff;cursor:pointer;touch-action:manipulation;margin-bottom:12px;text-align:center}
+
+/* PROGRESS */
+.progress-bar{height:5px;background:#e8ddd0;border-radius:3px;overflow:hidden;margin-top:16px}
+.progress-fill{height:100%;background:#4a3219;border-radius:3px;transition:width .3s}
+
+/* SCAN LINES */
+.scan-line{display:flex;align-items:center;padding:12px 0;border-bottom:1px solid #f0ebe0;gap:10px}
+.scan-chk{width:24px;height:24px;accent-color:#4a3219;cursor:pointer;flex-shrink:0}
+.scan-info{flex:1}
+.scan-name{font-size:13px;font-weight:600}
+.scan-match{font-size:11px;color:#27ae60}
+.scan-nomatch{font-size:11px;color:#e67e22}
+.scan-qty-input{width:80px;padding:8px;border:1.5px solid #e8ddd0;border-radius:8px;font-size:14px;font-weight:700;text-align:center;background:#fff}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-title">⚗️ YassLab Pro</div>
+  <div class="header-date" id="hdr-date"></div>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="main-content">
+
+  <!-- VUE ACCUEIL -->
+  <div class="vue act" id="vue-home">
+    <div id="home-alerts"></div>
+    <div class="grid2">
+      <button class="btn-big" style="background:#4a3219" onclick="goTo('stock')">
+        <span class="ico">📦</span>Stock
+      </button>
+      <button class="btn-big" style="background:#2471a3" onclick="goTo('planning')">
+        <span class="ico">📅</span>Planning
+      </button>
+      <button class="btn-big" style="background:#1e8449" onclick="goTo('commande')">
+        <span class="ico">🛒</span>Commander
+      </button>
+      <button class="btn-big" style="background:#7d6608" onclick="goTo('recettes')">
+        <span class="ico">📖</span>Recettes
+      </button>
+    </div>
+    <div class="card">
+      <div class="card-title">📅 Production aujourd'hui</div>
+      <div id="home-today"></div>
+    </div>
+  </div>
+
+  <!-- VUE STOCK -->
+  <div class="vue" id="vue-stock">
+    <button class="btn-secondary" style="background:#4a3219" onclick="goTo('scan-bon')">📦 Scanner bon de livraison</button>
+    <button class="btn-secondary" style="background:#2471a3" onclick="goTo('scan-prod')">🏷 Scanner un produit</button>
+    <button class="btn-outline" onclick="goTo('stock-form')">✏️ Saisie manuelle</button>
+    <div id="stock-alerts"></div>
+    <div class="card-title" style="margin-bottom:10px">Votre stock</div>
+    <div id="stock-list"></div>
+  </div>
+
+  <!-- VUE PLANNING -->
+  <div class="vue" id="vue-planning">
+    <div class="card-title" id="planning-titre" style="margin-bottom:12px">Planning semaine</div>
+    <div id="planning-list"></div>
+  </div>
+
+  <!-- VUE COMMANDE -->
+  <div class="vue" id="vue-commande">
+    <div style="font-size:12px;color:#8b7355;margin-bottom:14px">Planning semaine prochaine vs stock actuel</div>
+    <div id="commande-list"></div>
+  </div>
+
+  <!-- VUE RECETTES -->
+  <div class="vue" id="vue-recettes">
+    <input class="search-input" type="search" placeholder="🔍 Chercher une recette…" oninput="renderRecettes()" id="rec-search">
+    <div id="rec-list"></div>
+  </div>
+
+  <!-- VUE DETAIL RECETTE -->
+  <div class="vue" id="vue-recette-detail">
+    <button class="btn-back" onclick="goTo('recettes')">← Recettes</button>
+    <div id="rec-detail"></div>
+  </div>
+
+  <!-- VUE STOCK FORM -->
+  <div class="vue" id="vue-stock-form">
+    <button class="btn-back" onclick="goTo('stock')">← Stock</button>
+    <div class="card">
+      <div class="field">
+        <label>Ingrédient</label>
+        <select id="sf-ing" onchange="sfIngChange()"></select>
+      </div>
+      <div class="field">
+        <label>Quantité en stock</label>
+        <div class="qty-row">
+          <button class="qty-btn" onclick="sfAdj(-1000)">−</button>
+          <input class="qty-input" type="number" id="sf-qty" value="0" inputmode="numeric">
+          <button class="qty-btn" onclick="sfAdj(1000)">+</button>
+        </div>
+        <div class="qty-unit">grammes</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="field">
+          <label>DLC</label>
+          <input type="date" id="sf-dlc">
+        </div>
+        <div class="field">
+          <label>Lot (optionnel)</label>
+          <input type="text" id="sf-lot" placeholder="LOT-001">
+        </div>
+      </div>
+      <button class="btn-confirm" id="sf-btn" onclick="sfSave()">✅ Enregistrer en stock</button>
+    </div>
+  </div>
+
+  <!-- VUE SCANNER BON -->
+  <div class="vue" id="vue-scan-bon">
+    <button class="btn-back" onclick="goTo('stock')">← Stock</button>
+    <div id="scan-bon-content">
+      <div class="scan-center">
+        <div class="scan-ico">📦</div>
+        <div class="scan-title">Photographiez le bon de livraison</div>
+        <div class="scan-sub">Cadrez bien l'ensemble du document</div>
+        <label class="btn-camera">
+          📷 Prendre une photo
+          <input type="file" accept="image/*" capture="environment" id="scan-bon-file" onchange="handleScanBon(this)" style="display:none">
+        </label>
+        <label style="display:block;width:100%;border:1.5px solid #4a3219;border-radius:14px;padding:16px;font-size:15px;font-weight:600;color:#4a3219;cursor:pointer;text-align:center;background:#fff">
+          📁 Choisir une image
+          <input type="file" accept="image/*" id="scan-bon-file2" onchange="handleScanBon(this)" style="display:none">
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- VUE SCANNER PRODUIT -->
+  <div class="vue" id="vue-scan-prod">
+    <button class="btn-back" onclick="goTo('stock')">← Stock</button>
+    <div id="scan-prod-content">
+      <div class="scan-center">
+        <div class="scan-ico">🏷</div>
+        <div class="scan-title">Photographiez l'étiquette</div>
+        <div class="scan-sub">Pot, sac, bidon — cadrez l'étiquette</div>
+        <label class="btn-camera">
+          📷 Prendre une photo
+          <input type="file" accept="image/*" capture="environment" id="scan-prod-file" onchange="handleScanProd(this)" style="display:none">
+        </label>
+        <label style="display:block;width:100%;border:1.5px solid #4a3219;border-radius:14px;padding:16px;font-size:15px;font-weight:600;color:#4a3219;cursor:pointer;text-align:center;background:#fff">
+          📁 Choisir une image
+          <input type="file" accept="image/*" id="scan-prod-file2" onchange="handleScanProd(this)" style="display:none">
+        </label>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- NAV BAS -->
+<nav class="nav">
+  <button class="nav-btn act" id="nav-home" onclick="goTo('home')">
+    <span class="ico">🏠</span><span class="lbl">Accueil</span>
+  </button>
+  <button class="nav-btn" id="nav-stock" onclick="goTo('stock')">
+    <span class="ico">📦</span><span class="lbl">Stock</span>
+  </button>
+  <button class="nav-btn" id="nav-planning" onclick="goTo('planning')">
+    <span class="ico">📅</span><span class="lbl">Planning</span>
+  </button>
+  <button class="nav-btn" id="nav-commande" onclick="goTo('commande')">
+    <span class="ico">🛒</span><span class="lbl">Commander</span>
+  </button>
+  <button class="nav-btn" id="nav-recettes" onclick="goTo('recettes')">
+    <span class="ico">📖</span><span class="lbl">Recettes</span>
+  </button>
+</nav>
+
+<script>
+// ===== DONNEES =====
+var stockData = {};
+var fournData = [];
+var planningData = [];
+var savedRecipes = [];
+
+function loadData() {
+  try { stockData = JSON.parse(localStorage.getItem('ylp_stock') || '{}'); } catch(e) {}
+  try { fournData = JSON.parse(localStorage.getItem('ylp_fourn') || '[]'); } catch(e) {}
+  try { planningData = JSON.parse(localStorage.getItem('ylp_plan') || '[]'); } catch(e) {}
+  try { savedRecipes = JSON.parse(localStorage.getItem('ylp_r') || '[]'); } catch(e) {}
+}
+
+function saveStock() {
+  try { localStorage.setItem('ylp_stock', JSON.stringify(stockData)); } catch(e) {}
+}
+
+function fmtG(g) {
+  g = parseFloat(g) || 0;
+  return g >= 1000 ? (g / 1000).toFixed(2) + ' kg' : g.toFixed(0) + ' g';
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ===== NAVIGATION =====
+var currentVue = 'home';
+var navMap = {'home':'home','stock':'stock','planning':'planning','commande':'commande','recettes':'recettes',
+              'recette-detail':'recettes','stock-form':'stock','scan-bon':'stock','scan-prod':'stock'};
+
+function goTo(vue) {
+  // Masquer toutes les vues
+  document.querySelectorAll('.vue').forEach(function(v) { v.classList.remove('act'); });
+  var el = document.getElementById('vue-' + vue);
+  if (el) el.classList.add('act');
+  currentVue = vue;
+
+  // Scroll haut
+  document.getElementById('main-content').scrollTop = 0;
+  window.scrollTo(0, 0);
+
+  // Nav active
+  ['home','stock','planning','commande','recettes'].forEach(function(n) {
+    var btn = document.getElementById('nav-' + n);
+    if (btn) btn.classList.toggle('act', navMap[vue] === n);
+  });
+
+  // Charger contenu
+  loadData();
+  if (vue === 'home') renderHome();
+  if (vue === 'stock') renderStock();
+  if (vue === 'planning') renderPlanning();
+  if (vue === 'commande') renderCommande();
+  if (vue === 'recettes') renderRecettes();
+  if (vue === 'stock-form') initStockForm();
+}
+
+// ===== ACCUEIL =====
+function renderHome() {
+  // Date
+  var d = new Date();
+  var jours = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  var mois = ['jan','fév','mar','avr','mai','jun','jul','aoû','sep','oct','nov','déc'];
+  document.getElementById('hdr-date').textContent = jours[d.getDay()] + ' ' + d.getDate() + ' ' + mois[d.getMonth()];
+
+  // Alertes DLC
+  var today = new Date(); today.setHours(0,0,0,0);
+  var alertes = [];
+  Object.keys(stockData).forEach(function(nom) {
+    var s = stockData[nom];
+    if (s.dlc) {
+      var diff = Math.round((new Date(s.dlc) - today) / 86400000);
+      if (diff < 0) alertes.push('<div>🔴 <strong>' + esc(nom) + '</strong> — DLC expirée</div>');
+      else if (diff < 7) alertes.push('<div>🔴 <strong>' + esc(nom) + '</strong> — DLC dans ' + diff + ' j</div>');
+    }
+    if (s.min > 0 && s.qty < s.min) alertes.push('<div>📦 <strong>' + esc(nom) + '</strong> — Stock bas</div>');
+  });
+
+  var alertEl = document.getElementById('home-alerts');
+  alertEl.innerHTML = alertes.length
+    ? '<div class="alert alert-red" style="margin-bottom:12px">' + alertes.join('') + '</div>'
+    : '';
+
+  // Planning aujourd'hui
+  var todayStr = new Date().toISOString().slice(0, 10);
+  var todayBatches = planningData.filter(function(b) { return b.date === todayStr; });
+  var el = document.getElementById('home-today');
+  if (!todayBatches.length) {
+    el.innerHTML = '<div style="color:#8b7355;font-size:13px">Aucune production prévue aujourd\'hui</div>';
+  } else {
+    el.innerHTML = todayBatches.map(function(b) {
+      return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0ebe0">'
+        + '<span style="font-size:13px;font-weight:600">' + esc(b.recette || b.nom || 'Batch') + '</span>'
+        + '<span style="font-size:13px;font-weight:700;color:#4a3219">' + (b.litres || '?') + ' L</span>'
+        + '</div>';
+    }).join('');
+  }
+}
+
+// ===== STOCK =====
+function renderStock() {
+  var today = new Date(); today.setHours(0,0,0,0);
+  var alertes = [];
+  Object.keys(stockData).forEach(function(nom) {
+    var s = stockData[nom];
+    if (s.dlc) {
+      var diff = Math.round((new Date(s.dlc) - today) / 86400000);
+      if (diff < 0) alertes.push('<div>🔴 ' + esc(nom) + ' — DLC expirée (' + s.dlc + ')</div>');
+      else if (diff < 7) alertes.push('<div>🔴 ' + esc(nom) + ' — DLC dans ' + diff + ' j</div>');
+      else if (diff < 30) alertes.push('<div>🟠 ' + esc(nom) + ' — DLC dans ' + diff + ' j</div>');
+    }
+    if (s.min > 0 && s.qty < s.min) alertes.push('<div>📦 ' + esc(nom) + ' — Stock bas (' + fmtG(s.qty) + ')</div>');
+  });
+
+  var alertEl = document.getElementById('stock-alerts');
+  alertEl.innerHTML = alertes.length
+    ? '<div class="alert alert-red" style="margin-bottom:12px">' + alertes.join('') + '</div>'
+    : '';
+
+  var keys = Object.keys(stockData).sort();
+  var el = document.getElementById('stock-list');
+  if (!keys.length) {
+    el.innerHTML = '<div class="empty">Aucun stock saisi<br>Utilisez le scanner ou la saisie manuelle</div>';
+    return;
+  }
+
+  el.innerHTML = keys.map(function(nom) {
+    var s = stockData[nom];
+    var bas = s.min > 0 && s.qty < s.min;
+    var dlcInfo = '';
+    if (s.dlc) {
+      var diff = Math.round((new Date(s.dlc) - today) / 86400000);
+      dlcInfo = ' · DLC ' + (diff < 0 ? '<span style="color:#e74c3c">expirée</span>' : diff < 7 ? '<span style="color:#e74c3c">' + diff + 'j</span>' : s.dlc);
+    }
+    return '<div class="list-item" onclick="goTo(\'stock-form\');setTimeout(function(){sfSetIng(\'' + esc(nom).replace(/'/g, "\\'") + '\')},100)">'
+      + '<div><div class="list-item-name">' + esc(nom) + '</div>'
+      + '<div class="list-item-sub">' + (s.lot ? 'Lot: ' + esc(s.lot) : '') + dlcInfo + '</div></div>'
+      + '<div style="display:flex;align-items:center;gap:8px">'
+      + '<div class="list-item-val' + (bas ? ' red' : '') + '">' + fmtG(s.qty) + '</div>'
+      + '<span class="arrow">›</span></div>'
+      + '</div>';
+  }).join('');
+}
+
+// ===== STOCK FORM =====
+function initStockForm() {
+  // Récupérer tous les noms possibles
+  var names = {};
+  Object.keys(stockData).forEach(function(n) { names[n] = 1; });
+  savedRecipes.forEach(function(r) {
+    (r.recipe || []).forEach(function(row) {
+      var nom = (row.ing || {}).nom || row.n || '';
+      if (nom) names[nom] = 1;
+    });
+  });
+  var sorted = Object.keys(names).sort();
+  var sel = document.getElementById('sf-ing');
+  sel.innerHTML = sorted.map(function(n) {
+    return '<option value="' + esc(n) + '">' + esc(n) + '</option>';
+  }).join('');
+  sfIngChange();
+}
+
+function sfSetIng(nom) {
+  var sel = document.getElementById('sf-ing');
+  for (var i = 0; i < sel.options.length; i++) {
+    if (sel.options[i].value === nom) { sel.selectedIndex = i; break; }
+  }
+  sfIngChange();
+}
+
+function sfIngChange() {
+  var nom = document.getElementById('sf-ing').value;
+  var s = stockData[nom] || {};
+  document.getElementById('sf-qty').value = s.qty || 0;
+  document.getElementById('sf-dlc').value = s.dlc || '';
+  document.getElementById('sf-lot').value = s.lot || '';
+}
+
+function sfAdj(delta) {
+  var el = document.getElementById('sf-qty');
+  el.value = Math.max(0, (parseFloat(el.value) || 0) + delta);
+}
+
+function sfSave() {
+  var nom = document.getElementById('sf-ing').value;
+  var qty = parseFloat(document.getElementById('sf-qty').value) || 0;
+  var dlc = document.getElementById('sf-dlc').value || '';
+  var lot = document.getElementById('sf-lot').value.trim() || '';
+  if (!nom) { alert('Choisir un ingrédient'); return; }
+  if (!stockData[nom]) stockData[nom] = { qty: 0, min: 0, cond: 0, dlc: '', lot: '' };
+  stockData[nom].qty = qty;
+  if (dlc) stockData[nom].dlc = dlc;
+  if (lot) stockData[nom].lot = lot;
+  saveStock();
+  var btn = document.getElementById('sf-btn');
+  btn.textContent = '✅ Enregistré !';
+  btn.style.background = '#1e8449';
+  setTimeout(function() {
+    btn.textContent = '✅ Enregistrer en stock';
+    btn.style.background = '';
+    goTo('stock');
+  }, 1000);
+}
+
+// ===== PLANNING =====
+function renderPlanning() {
+  var now = new Date();
+  var day = now.getDay();
+  var monday = new Date(now);
+  monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+  var jours = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  var mois = ['jan','fév','mar','avr','mai','jun','jul','aoû','sep','oct','nov','déc'];
+  document.getElementById('planning-titre').textContent = 'Semaine du ' + monday.getDate() + ' ' + mois[monday.getMonth()];
+  var html = '';
+  for (var i = 0; i < 7; i++) {
+    var d = new Date(monday); d.setDate(monday.getDate() + i);
+    var dateStr = d.toISOString().slice(0, 10);
+    var batches = planningData.filter(function(b) { return b.date === dateStr; });
+    var isToday = dateStr === now.toISOString().slice(0, 10);
+    html += '<div class="card" style="' + (isToday ? 'border:2px solid #4a3219' : '') + '">'
+      + '<div style="font-size:12px;font-weight:700;color:' + (isToday ? '#4a3219' : '#8b7355') + ';margin-bottom:6px">'
+      + jours[d.getDay()] + ' ' + d.getDate() + '/' + (d.getMonth() + 1) + (isToday ? ' — Aujourd\'hui' : '') + '</div>';
+    if (!batches.length) {
+      html += '<div style="font-size:12px;color:#8b7355">Repos</div>';
+    } else {
+      html += batches.map(function(b) {
+        return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0ebe0">'
+          + '<span style="font-size:13px;font-weight:500">' + esc(b.recette || b.nom || 'Batch') + '</span>'
+          + '<span style="font-size:13px;font-weight:700;color:#4a3219">' + (b.litres || '?') + ' L</span>'
+          + '</div>';
+      }).join('');
+    }
+    html += '</div>';
+  }
+  document.getElementById('planning-list').innerHTML = html || '<div class="empty">Aucun batch planifié</div>';
+}
+
+// ===== COMMANDE =====
+function renderCommande() {
+  var now = new Date();
+  var day = now.getDay();
+  var monday = new Date(now);
+  monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1) + 7);
+  var nextWeek = [];
+  for (var i = 0; i < 7; i++) {
+    var d = new Date(monday); d.setDate(monday.getDate() + i);
+    nextWeek.push(d.toISOString().slice(0, 10));
+  }
+
+  var nextBatches = planningData.filter(function(b) { return nextWeek.indexOf(b.date) >= 0; });
+  var el = document.getElementById('commande-list');
+
+  if (!nextBatches.length) {
+    el.innerHTML = '<div class="empty">Aucune production planifiée la semaine prochaine</div>';
+    return;
+  }
+
+  var besoins = {};
+  nextBatches.forEach(function(b) {
+    if (!b.recipe) return;
+    var scale = (parseFloat(b.litres) || 0) / (parseFloat(b.litresProd) || 10);
+    b.recipe.forEach(function(row) {
+      var nom = (row.ing || {}).nom || row.n || '?';
+      besoins[nom] = (besoins[nom] || 0) + (parseFloat(row.qty) || 0) * scale;
+    });
+  });
+
+  var parFourn = {};
+  var sansFourn = [];
+  var toutOk = true;
+
+  Object.keys(besoins).forEach(function(nom) {
+    var besoin = besoins[nom];
+    var s = stockData[nom] || { qty: 0, cond: 0, fourn: '' };
+    var stock = parseFloat(s.qty) || 0;
+    var manque = Math.max(0, besoin - stock);
+    if (manque <= 0) return;
+    toutOk = false;
+    var cond = parseFloat(s.cond) || 0;
+    var qteCmd = cond > 0 ? Math.ceil(manque / cond) : 0;
+    var entry = { nom: nom, besoin: besoin, stock: stock, manque: manque, cond: cond, qteCmd: qteCmd };
+    var fi = (s.fourn !== undefined && s.fourn !== '') ? parseInt(s.fourn) : -1;
+    if (fi >= 0 && fournData[fi]) {
+      if (!parFourn[fi]) parFourn[fi] = [];
+      parFourn[fi].push(entry);
+    } else {
+      sansFourn.push(entry);
+    }
+  });
+
+  if (toutOk) {
+    el.innerHTML = '<div class="alert alert-green">✅ Tout est en stock pour la semaine prochaine !</div>';
+    return;
+  }
+
+  var jours = ['','Lun','Mar','Mer','Jeu','Ven'];
+  var html = '';
+
+  Object.keys(parFourn).forEach(function(fi) {
+    var f = fournData[fi];
+    var rows = parFourn[fi];
+    html += '<div class="card">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
+      + '<div><div style="font-size:14px;font-weight:700;color:#4a3219">🏭 ' + esc(f.nom) + '</div>'
+      + (f.jour ? '<div style="font-size:11px;color:#8b7355">Commande le ' + jours[f.jour] + '</div>' : '')
+      + '</div>'
+      + (f.email ? '<button onclick="mailCmd(' + fi + ')" style="background:#2471a3;color:#fff;border:none;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;cursor:pointer;touch-action:manipulation">📧 Envoyer</button>' : '')
+      + '</div>'
+      + rows.map(function(r) {
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid #f0ebe0">'
+          + '<div><div style="font-size:13px;font-weight:500">' + esc(r.nom) + '</div>'
+          + '<div style="font-size:11px;color:#8b7355">Stock: ' + fmtG(r.stock) + ' · Besoin: ' + fmtG(r.besoin) + '</div></div>'
+          + '<div style="text-align:right">'
+          + '<div style="font-size:14px;font-weight:700;color:#e74c3c">' + fmtG(r.manque) + '</div>'
+          + (r.cond > 0 ? '<div style="font-size:11px;color:#4a3219">→ ' + r.qteCmd + ' × ' + fmtG(r.cond) + '</div>' : '')
+          + '</div></div>';
+      }).join('')
+      + '</div>';
+  });
+
+  if (sansFourn.length) {
+    html += '<div class="card"><div style="font-size:13px;font-weight:700;color:#8b7355;margin-bottom:10px">❓ Sans fournisseur</div>'
+      + sansFourn.map(function(r) {
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid #f0ebe0">'
+          + '<div style="font-size:13px;font-weight:500">' + esc(r.nom) + '</div>'
+          + '<div style="font-size:14px;font-weight:700;color:#e74c3c">' + fmtG(r.manque) + '</div></div>';
+      }).join('')
+      + '</div>';
+  }
+
+  el.innerHTML = html;
+}
+
+function mailCmd(fi) {
+  var f = fournData[fi];
+  if (!f || !f.email) return;
+  var now = new Date();
+  var day = now.getDay();
+  var monday = new Date(now);
+  monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1) + 7);
+  var nextWeek = [];
+  for (var i = 0; i < 7; i++) {
+    var d = new Date(monday); d.setDate(monday.getDate() + i);
+    nextWeek.push(d.toISOString().slice(0, 10));
+  }
+  var besoins = {};
+  planningData.filter(function(b) { return nextWeek.indexOf(b.date) >= 0; }).forEach(function(b) {
+    if (!b.recipe) return;
+    var scale = (parseFloat(b.litres) || 0) / (parseFloat(b.litresProd) || 10);
+    b.recipe.forEach(function(row) {
+      var nom = (row.ing || {}).nom || row.n || '?';
+      besoins[nom] = (besoins[nom] || 0) + (parseFloat(row.qty) || 0) * scale;
+    });
+  });
+  var lignes = [];
+  Object.keys(besoins).forEach(function(nom) {
+    var s = stockData[nom] || { qty: 0, cond: 0, fourn: '' };
+    if ((s.fourn + '') !== ('' + fi)) return;
+    var manque = Math.max(0, besoins[nom] - (parseFloat(s.qty) || 0));
+    if (manque <= 0) return;
+    var cond = parseFloat(s.cond) || 0;
+    var qte = cond > 0 ? Math.ceil(manque / cond) + ' × ' + fmtG(cond) : fmtG(manque);
+    lignes.push('- ' + nom + ' : ' + qte);
+  });
+  if (!lignes.length) { alert('Rien à commander chez ce fournisseur'); return; }
+  var subject = encodeURIComponent('Commande semaine du ' + nextWeek[0]);
+  var body = encodeURIComponent('Bonjour,\n\nCommande pour la semaine du ' + nextWeek[0] + ' :\n\n' + lignes.join('\n') + '\n\nCordialement');
+  window.location.href = 'mailto:' + f.email + '?subject=' + subject + '&body=' + body;
+}
+
+// ===== RECETTES =====
+function renderRecettes() {
+  var search = (document.getElementById('rec-search').value || '').toLowerCase();
+  var recs = savedRecipes.filter(function(r) {
+    return !search || (r.nom || '').toLowerCase().indexOf(search) >= 0;
+  });
+  var el = document.getElementById('rec-list');
+  if (!recs.length) {
+    el.innerHTML = '<div class="empty">Aucune recette trouvée</div>';
+    return;
+  }
+  el.innerHTML = recs.map(function(r, i) {
+    var total = (r.recipe || []).reduce(function(s, row) { return s + (parseFloat(row.qty) || 0); }, 0);
+    return '<div class="list-item" onclick="showRecette(' + i + ')">'
+      + '<div><div class="list-item-name">' + esc(r.nom || 'Sans nom') + '</div>'
+      + '<div class="list-item-sub">' + (r.type || '') + ' · ' + (r.recipe || []).length + ' ingrédients · ' + (total / 1000).toFixed(2) + ' kg</div></div>'
+      + '<span class="arrow">›</span></div>';
+  }).join('');
+}
+
+function showRecette(idx) {
+  var r = savedRecipes[idx];
+  if (!r) return;
+  var html = '<div style="font-size:20px;font-weight:700;color:#4a3219;margin-bottom:4px">' + esc(r.nom || 'Sans nom') + '</div>'
+    + '<div style="font-size:12px;color:#8b7355;margin-bottom:16px">' + (r.type || '') + ' · ' + (r.date || '').slice(0, 10) + '</div>'
+    + '<div class="card">'
+    + (r.recipe || []).map(function(row) {
+      var nom = (row.ing || {}).nom || row.n || '?';
+      var qty = parseFloat(row.qty) || 0;
+      return '<div class="rec-row"><span class="rec-ing">' + esc(nom) + '</span>'
+        + '<span class="rec-qty">' + (qty >= 1000 ? (qty / 1000).toFixed(3) + ' kg' : qty.toFixed(0) + ' g') + '</span></div>';
+    }).join('')
+    + '</div>';
+  document.getElementById('rec-detail').innerHTML = html;
+  goTo('recette-detail');
+}
+
+// ===== SCANNER =====
+function handleScanBon(input) {
+  var file = input.files && input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) { analyzeScan(e.target.result, 'bon'); };
+  reader.readAsDataURL(file);
+}
+
+function handleScanProd(input) {
+  var file = input.files && input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) { analyzeScan(e.target.result, 'produit'); };
+  reader.readAsDataURL(file);
+}
+
+function analyzeScan(dataUrl, mode) {
+  var base64 = dataUrl.split(',')[1];
+  var mediaType = dataUrl.split(';')[0].split(':')[1];
+  var targetId = mode === 'bon' ? 'scan-bon-content' : 'scan-prod-content';
+  var el = document.getElementById(targetId);
+
+  el.innerHTML = '<div class="scan-center"><div class="scan-ico">🔍</div>'
+    + '<div class="scan-title">Analyse en cours…</div>'
+    + '<div class="scan-sub">Claude lit votre ' + (mode === 'bon' ? 'bon de livraison' : 'étiquette') + '</div>'
+    + '<div class="progress-bar"><div class="progress-fill" id="scan-prog" style="width:0%"></div></div></div>';
+
+  var p = 0;
+  var t = setInterval(function() { p = Math.min(p + 5, 85); var pb = document.getElementById('scan-prog'); if(pb) pb.style.width = p + '%'; }, 300);
+
+  var prompt = mode === 'produit'
+    ? 'Analyse cette étiquette produit alimentaire. Retourne UNIQUEMENT un JSON valide sans backticks:\n{"nom":"nom produit","marque":"marque ou vide","quantite_g":0,"unite_originale":"kg/g/L","quantite_originale":0,"dlc":"YYYY-MM-DD ou vide","lot":"lot ou vide"}\nConvertis en grammes (1kg=1000g, 1L=1000g).'
+    : 'Analyse ce bon de livraison. Retourne UNIQUEMENT un JSON valide sans backticks:\n{"fournisseur":"nom","date":"YYYY-MM-DD ou vide","lignes":[{"nom":"produit","quantite_g":0,"unite_originale":"kg","quantite_originale":0,"dlc":"YYYY-MM-DD ou vide","lot":"lot ou vide"}]}\nConvertis en grammes.';
+
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1500,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+          { type: 'text', text: prompt }
+        ]
+      }]
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    clearInterval(t);
+    var pb = document.getElementById('scan-prog'); if(pb) pb.style.width = '100%';
+    setTimeout(function() {
+      try {
+        var txt = (data.content && data.content[0] && data.content[0].text) || '';
+        var clean = txt.replace(/```json|```/g, '').trim();
+        var result = JSON.parse(clean);
+        if (mode === 'bon') renderScanBonResult(result);
+        else renderScanProdResult(result);
+      } catch(e) {
+        el.innerHTML = '<div class="scan-center"><div class="scan-ico">❌</div>'
+          + '<div class="scan-title">Lecture impossible</div>'
+          + '<div class="scan-sub">Réessayez avec une photo plus nette</div>'
+          + '<button class="btn-camera" onclick="goTo(\'scan-' + mode.replace('produit','prod') + '\')">🔄 Réessayer</button></div>';
+      }
+    }, 400);
+  })
+  .catch(function(e) {
+    clearInterval(t);
+    el.innerHTML = '<div class="scan-center"><div class="scan-ico">📵</div>'
+      + '<div class="scan-title">Pas de connexion</div>'
+      + '<div class="scan-sub">Le scanner nécessite internet</div>'
+      + '<button class="btn-camera" onclick="goTo(\'scan-' + mode.replace('produit','prod') + '\')">🔄 Réessayer</button></div>';
+  });
+}
+
+function findMatch(nom) {
+  var nomLow = (nom || '').toLowerCase().split(' ')[0];
+  var keys = Object.keys(stockData);
+  for (var i = 0; i < keys.length; i++) {
+    var kLow = keys[i].toLowerCase();
+    if (kLow.indexOf(nomLow) >= 0 || nomLow.indexOf(kLow.split(' ')[0]) >= 0) return keys[i];
+  }
+  return '';
+}
+
+function renderScanBonResult(data) {
+  var lines = data.lignes || [];
+  var html = '<div style="font-size:14px;font-weight:700;color:#4a3219;margin-bottom:4px">🏭 ' + esc(data.fournisseur || 'Fournisseur') + '</div>'
+    + '<div style="font-size:12px;color:#8b7355;margin-bottom:14px">' + (data.date ? 'Livraison du ' + data.date : '') + '</div>';
+
+  lines.forEach(function(l, i) {
+    var match = findMatch(l.nom);
+    html += '<div class="scan-line">'
+      + '<input type="checkbox" class="scan-chk" id="sc' + i + '" checked>'
+      + '<div class="scan-info">'
+      + '<div class="scan-name">' + esc(l.nom) + '</div>'
+      + (match ? '<div class="scan-match">→ ' + esc(match) + '</div>' : '<div class="scan-nomatch">⚠ non trouvé dans stock</div>')
+      + '<input type="hidden" id="scn' + i + '" value="' + esc(match || l.nom) + '">'
+      + '</div>'
+      + '<div style="text-align:right">'
+      + '<input class="scan-qty-input" type="number" id="scq' + i + '" value="' + (l.quantite_g || 0) + '" inputmode="numeric">'
+      + '<div style="font-size:10px;color:#8b7355">' + esc((l.quantite_originale || '') + ' ' + (l.unite_originale || '')) + '</div>'
+      + '</div></div>';
+  });
+
+  html += '<button class="btn-confirm" onclick="validerScanBon(' + lines.length + ')">✅ Valider et entrer en stock</button>';
+  document.getElementById('scan-bon-content').innerHTML = html;
+}
+
+function validerScanBon(count) {
+  var saved = 0;
+  for (var i = 0; i < count; i++) {
+    var chk = document.getElementById('sc' + i);
+    if (!chk || !chk.checked) continue;
+    var nom = (document.getElementById('scn' + i) || {}).value || '';
+    var qty = parseFloat((document.getElementById('scq' + i) || {}).value) || 0;
+    if (!nom || qty <= 0) continue;
+    if (!stockData[nom]) stockData[nom] = { qty: 0, min: 0, cond: 0, dlc: '', lot: '' };
+    stockData[nom].qty = (parseFloat(stockData[nom].qty) || 0) + qty;
+    saved++;
+  }
+  saveStock();
+  document.getElementById('scan-bon-content').innerHTML = '<div class="scan-center">'
+    + '<div class="scan-ico">✅</div>'
+    + '<div class="scan-title">' + saved + ' ingrédient' + (saved > 1 ? 's' : '') + ' ajouté' + (saved > 1 ? 's' : '') + '</div>'
+    + '<div class="scan-sub">Stock mis à jour</div>'
+    + '<button class="btn-camera" onclick="goTo(\'stock\')">Voir le stock</button>'
+    + '<button onclick="goTo(\'scan-bon\')" style="display:block;width:100%;border:1.5px solid #4a3219;border-radius:14px;padding:16px;font-size:15px;font-weight:600;color:#4a3219;background:#fff;cursor:pointer;touch-action:manipulation;margin-top:10px">📦 Scanner un autre bon</button>'
+    + '</div>';
+}
+
+function renderScanProdResult(data) {
+  var match = findMatch(data.nom);
+  var namesHtml = '<option value="' + esc(data.nom) + '"' + (match ? '' : ' selected') + '>+ Nouveau : ' + esc(data.nom) + '</option>';
+  Object.keys(stockData).sort().forEach(function(n) {
+    namesHtml += '<option value="' + esc(n) + '"' + (n === match ? ' selected' : '') + '>' + esc(n) + '</option>';
+  });
+
+  document.getElementById('scan-prod-content').innerHTML = '<div class="card" style="background:#f0ebe0;margin-bottom:14px">'
+    + '<div style="font-size:12px;font-weight:600;color:#4a3219">Lu sur l\'étiquette :</div>'
+    + '<div style="font-size:13px;margin-top:4px">' + esc(data.nom) + (data.marque ? ' — ' + esc(data.marque) : '')
+    + (data.quantite_originale ? ' — ' + data.quantite_originale + ' ' + data.unite_originale : '') + '</div></div>'
+    + '<div class="field"><label>Ingrédient dans votre stock</label><select id="sp-nom">' + namesHtml + '</select></div>'
+    + '<div class="field"><label>Quantité</label>'
+    + '<div class="qty-row"><button class="qty-btn" onclick="spAdj(-1000)">−</button>'
+    + '<input class="qty-input" type="number" id="sp-qty" value="' + (data.quantite_g || 0) + '" inputmode="numeric">'
+    + '<button class="qty-btn" onclick="spAdj(1000)">+</button></div>'
+    + '<div class="qty-unit">grammes</div></div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+    + '<div class="field"><label>DLC</label><input type="date" id="sp-dlc" value="' + esc(data.dlc || '') + '"></div>'
+    + '<div class="field"><label>Lot</label><input type="text" id="sp-lot" value="' + esc(data.lot || '') + '" placeholder="LOT-001"></div></div>'
+    + '<button class="btn-confirm" onclick="validerScanProd()">✅ Entrer en stock</button>';
+}
+
+function spAdj(delta) {
+  var el = document.getElementById('sp-qty');
+  if (el) el.value = Math.max(0, (parseFloat(el.value) || 0) + delta);
+}
+
+function validerScanProd() {
+  var nom = (document.getElementById('sp-nom') || {}).value || '';
+  var qty = parseFloat((document.getElementById('sp-qty') || {}).value) || 0;
+  var dlc = (document.getElementById('sp-dlc') || {}).value || '';
+  var lot = ((document.getElementById('sp-lot') || {}).value || '').trim();
+  if (!nom || qty <= 0) { alert('Nom et quantité requis'); return; }
+  if (!stockData[nom]) stockData[nom] = { qty: 0, min: 0, cond: 0, dlc: '', lot: '' };
+  stockData[nom].qty = (parseFloat(stockData[nom].qty) || 0) + qty;
+  if (dlc) stockData[nom].dlc = dlc;
+  if (lot) stockData[nom].lot = lot;
+  saveStock();
+  document.getElementById('scan-prod-content').innerHTML = '<div class="scan-center">'
+    + '<div class="scan-ico">✅</div>'
+    + '<div class="scan-title">' + esc(nom) + ' ajouté</div>'
+    + '<div class="scan-sub">' + fmtG(qty) + ' en stock</div>'
+    + '<button class="btn-camera" onclick="goTo(\'stock\')">Voir le stock</button>'
+    + '<button onclick="goTo(\'scan-prod\')" style="display:block;width:100%;border:1.5px solid #4a3219;border-radius:14px;padding:16px;font-size:15px;font-weight:600;color:#4a3219;background:#fff;cursor:pointer;touch-action:manipulation;margin-top:10px">🏷 Scanner un autre produit</button>'
+    + '</div>';
+}
+
+// ===== INIT =====
+loadData();
+renderHome();
+document.getElementById('hdr-date').textContent = (function() {
+  var d = new Date();
+  var jours = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  var mois = ['jan','fév','mar','avr','mai','jun','jul','aoû','sep','oct','nov','déc'];
+  return jours[d.getDay()] + ' ' + d.getDate() + ' ' + mois[d.getMonth()];
+})();
+</script>
+</body>
+</html>
